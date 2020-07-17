@@ -65,7 +65,7 @@ class WorkermanCommand extends Command
     private function start()
     {
         // 创建一个Worker监听20002端口，不使用任何应用层协议
-        /*$this->server = new Worker("websocket://172.16.100.64:20002");
+        $this->server = new Worker("websocket://172.16.100.64:20002");
         // 启动4个进程对外提供服务
         $this->server->count = 4;
         $handler = app(WorkermanHandler::class);
@@ -76,7 +76,7 @@ class WorkermanCommand extends Command
         // 进程启动后的回调
         $this->server->onWorkerStart = [$handler, 'onWorkerStart'];
         // 断开时触发的回调
-        $this->server->onClose = [$handler, 'onClose'];*/
+        $this->server->onClose = [$handler, 'onClose'];
 
 //        global $text_worker;
 //
@@ -94,64 +94,8 @@ class WorkermanCommand extends Command
 //        $text_worker->onClose = array($handler,"onClose");
 //        $text_worker->onWorkerStart = array($handler,"onWorkerStart");
 
-        $this->server = new Worker("websocket://172.16.100.64:20002");
-        // 启动4个进程对外提供服务
-        $this->server->count = 4;
-
-        // 连接时回调
-        $this->server->onConnect = function($connection){
-            //连接
-            $this->onConnection($connection);
-        };
-        // 收到客户端信息时回调
-        $this->server->onMessage = function ($connection, $data){
-            //消息
-            $this->onMessage($connection, $data);
-        };
-        // 进程启动后的回调
-        $this->server->onWorkerStart = function ($connection){
-            //启动
-            $this->onWorkerStart($connection);
-        };
-        // 断开时触发的回调
-        $this->server->onClose = function($connection){
-            //断开
-            $this->onClose($connection);
-        };
-
         // 运行worker
         Worker::runAll();
-    }
-
-    //连接
-    public function onConnection($connection)
-    {
-        //判断是否设置了UID
-        if(!isset($connection->uid)){
-            //给用户分配一个UID
-            $connection->uid = $this->random_string();
-            //保存用户的uid
-            $connection->uidConnections["{$connection->uid}"] = $connection;
-            //向用户返回创建成功的信息
-            $connection->send("用户:[{$connection->uid}] 创建成功");
-            echo '--------------------'."\n";
-            print_r(json($connection->uidConnections));
-        }
-    }
-
-    public function onMessage($connection, $data)
-    {
-        //消息
-    }
-
-    public function onWorkerStart()
-    {
-        //启动
-    }
-
-    public function onClose()
-    {
-        //关闭
     }
 
 }

@@ -24,11 +24,9 @@ class WorkermanHandler
 //            $text_worker->uidConnections["{$connection->uid}"] = $connection;
             $connection->uidConnections["{$connection->uid}"] = $connection;
             //向用户返回创建成功的信息
-            $connection->send("用户:[{$connection->uid}] 创建成功");
-            echo '--------------------'."\n";
-            print_r(json($connection->uidConnections));
+            $connection->send('{"type":"say", "message": "用户:'.$connection->uid.' 创建成功"}');
+            echo '--------------------'.$connection->getRemoteIp()."\n";
         }
-
 
     }
 
@@ -140,6 +138,7 @@ class WorkermanHandler
                 }
                 return;
             case "pong":
+                echo "--- pong ---"."\n";
                 return;
         }
 
@@ -148,14 +147,14 @@ class WorkermanHandler
     // 处理客户端断开
     public function onClose($connection)
     {
-//        echo "connection closed from ip {$connection->getRemoteIp()}\n";
+        echo "connection closed from ip {$connection->getRemoteIp()}\n";
 
-        global $text_worker;
+//        global $text_worker;
         $user_name=$text_worker->uidInfo[$connection->uid]['user_name'] ?? "";
-        unset($text_worker->uidConnections["{$connection->uid}"]);
-        unset($text_worker->uidInfo["{$connection->uid}"]);
+//        unset($text_worker->uidConnections["{$connection->uid}"]);
+//        unset($text_worker->uidInfo["{$connection->uid}"]);
 
-        if(!empty($user_name)){
+        /*if(!empty($user_name)){
             $return_data=array(
                 "type"=>"logout",
                 "uid"=>$connection->uid,
@@ -165,7 +164,7 @@ class WorkermanHandler
             foreach($text_worker->connections as $conn){
                 $conn->send(json_encode($return_data));
             }
-        }
+        }*/
     }
 
     public function onWorkerStart($worker)
@@ -179,10 +178,10 @@ class WorkermanHandler
                     continue;
                 }
                 // 上次通讯时间间隔大于心跳间隔，则认为客户端已经下线，关闭连接
-                /*if ($time_now - $connection->lastMessageTime > HEARTBEAT_TIME) {
+                if ($time_now - $connection->lastMessageTime > HEARTBEAT_TIME) {
                     echo "Client ip {$connection->getRemoteIp()} timeout!!!\n";
                     $connection->close();
-                }*/
+                }
             }
         });
         //每隔30秒就向客户端发送一条心跳验证
